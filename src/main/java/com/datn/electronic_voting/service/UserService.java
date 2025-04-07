@@ -1,5 +1,7 @@
 package com.datn.electronic_voting.service;
 
+import com.datn.electronic_voting.dto.request.AuthenticationRequest;
+import com.datn.electronic_voting.dto.response.AuthenticationResponse;
 import com.datn.electronic_voting.entity.User;
 import org.springframework.data.domain.Pageable;
 
@@ -17,4 +19,6 @@ public interface UserService {
     User findUserById(Long id);
 
     void deleteUser(Long id);
+
+    AuthenticationResponse verify(AuthenticationRequest auth);
 }
