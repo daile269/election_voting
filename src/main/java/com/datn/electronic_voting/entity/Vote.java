@@ -57,14 +57,6 @@ public class Vote {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String gy;
 
-    // Commitment t = g^r mod p (ZKP)
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private BigInteger zk_t;
-
-    // Response s = r + c·x mod q (ZKP)
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private BigInteger zk_s;
-
 
     @PrePersist
     public void prePersist() {

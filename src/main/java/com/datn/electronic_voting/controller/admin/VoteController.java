@@ -39,8 +39,8 @@ public class VoteController {
     }
 
     @PutMapping(value = "/{id}")
-    public Vote updateVote(@RequestBody Vote vote, @PathVariable Long id){
-        return voteService.updateVote(vote,id);
+    public Vote updateVote(@RequestBody Vote vote, @PathVariable Long id,@RequestParam boolean voteChoice){
+        return voteService.updateVote(vote,id,voteChoice);
     }
 
     @DeleteMapping(value = "/{id}")
@@ -49,12 +49,19 @@ public class VoteController {
         return ResponseEntity.ok("Xóa thành công");
     }
 
-    @GetMapping("/voteCount/{electionId}/{candidateId}")
+    @GetMapping("/agreeVote/{electionId}/{candidateId}")
     public ResponseEntity<String> countAgreeVotes(@PathVariable Long electionId,@PathVariable Long candidateId){
-        return ResponseEntity.ok("Tổng số lượng vote cho ứng viên này là: "+voteService.countAgreeVotes(electionId,candidateId));
+        return ResponseEntity.ok("Tổng số lượng vote đồng ý cho ứng viên này là: "
+                +voteService.countAgreeVotes(electionId,candidateId));
     }
     @GetMapping("/{electionId}/{candidateId}")
-    public List<Vote> getvotesele(@PathVariable Long electionId,@PathVariable Long candidateId){
+    public List<Vote> getvoteEle(@PathVariable Long electionId,@PathVariable Long candidateId){
         return voteService.getVoteByElectionAndCandidateId(electionId,candidateId);
+    }
+
+    @GetMapping("/totalVote/{electionId}/{candidateId}")
+    public ResponseEntity<String> totalVoteInElection(@PathVariable Long electionId,@PathVariable Long candidateId){
+        return ResponseEntity.ok("Tổng số lượng vote cho ứng viên này là: "
+                +voteService.countVoteCandidateInElection(electionId,candidateId));
     }
 }
