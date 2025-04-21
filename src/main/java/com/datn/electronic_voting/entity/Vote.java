@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
@@ -43,6 +44,27 @@ public class Vote {
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime voteTime;
+
+    // gx = g^x mod p (public key của người vote)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String gx;
+
+    // encryptedVote = (g^y)^x * g mod p (phiếu mã hóa)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String encryptedVote;
+
+    // encryptedVote = (g^y)^x * g mod p (phiếu mã hóa)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String gy;
+
+    // Commitment t = g^r mod p (ZKP)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private BigInteger zk_t;
+
+    // Response s = r + c·x mod q (ZKP)
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private BigInteger zk_s;
+
 
     @PrePersist
     public void prePersist() {

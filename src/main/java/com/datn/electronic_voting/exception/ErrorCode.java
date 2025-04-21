@@ -13,6 +13,9 @@ public enum ErrorCode {
     CANDIDATE_NOT_FOUND(999,"Ứng viên k tồn tại"),
     RESULT_NOT_FOUND(999,"Không có kết quả của cuộc bỏ phiếu"),
     VOTE_NOT_FOUND(999," Không tìm thấy phiếu bầu"),
+    VOTELIST_NULL(999," Chưa có phiếu bầu cho cuộc bầu cử này"),
+
+    ELECTION_CODE_VALID(999," Mã cuộc bỏ phiếu không chính xác"),
     UNAUTHENTICATED(777,"Không có quyền truy cập" );
 
     private final int code;

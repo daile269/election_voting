@@ -17,6 +17,8 @@ public interface ElectionService {
 
     Election findElectionById(Long id);
 
+    Election findElectionByElectionCode(String electionCode);
+
     void deleteElection(Long id);
 
 }

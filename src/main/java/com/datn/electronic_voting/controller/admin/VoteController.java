@@ -34,8 +34,8 @@ public class VoteController {
     }
 
     @PostMapping
-    public Vote createVote(@RequestBody Vote vote){
-        return voteService.createVote(vote);
+    public Vote createVote(@RequestBody Vote vote, @RequestParam boolean voteChoice){
+        return voteService.createVote(vote,voteChoice);
     }
 
     @PutMapping(value = "/{id}")
@@ -49,4 +49,12 @@ public class VoteController {
         return ResponseEntity.ok("Xóa thành công");
     }
 
+    @GetMapping("/voteCount/{electionId}/{candidateId}")
+    public ResponseEntity<String> countAgreeVotes(@PathVariable Long electionId,@PathVariable Long candidateId){
+        return ResponseEntity.ok("Tổng số lượng vote cho ứng viên này là: "+voteService.countAgreeVotes(electionId,candidateId));
+    }
+    @GetMapping("/{electionId}/{candidateId}")
+    public List<Vote> getvotesele(@PathVariable Long electionId,@PathVariable Long candidateId){
+        return voteService.getVoteByElectionAndCandidateId(electionId,candidateId);
+    }
 }

@@ -51,6 +51,13 @@ public class IElectionService implements ElectionService {
     }
 
     @Override
+    public Election findElectionByElectionCode(String electionCode) {
+        Election election = electionRepository.findElectionByElectionCode(electionCode);
+        if(election == null ) throw new AppException(ErrorCode.ELECTION_CODE_VALID);
+        return election;
+    }
+
+    @Override
     public void deleteElection(Long id) {
         electionRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.ELECTION_NOT_FOUND));
         electionRepository.deleteById(id);

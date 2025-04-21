@@ -48,4 +48,9 @@ public class ElectionController {
         electionService.deleteElection(id);
         return ResponseEntity.ok().body("Xóa thành công");
     }
+    @GetMapping("/joinElection/{electionCode}")
+    public Election findElectionByElectionCode(@PathVariable String electionCode){
+
+        return electionService.findElectionByElectionCode(electionCode);
+    }
 }
