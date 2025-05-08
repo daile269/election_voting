@@ -7,9 +7,14 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -17,6 +22,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,property = "id")
 @Table(name = "user")
 public class User {
@@ -34,10 +40,14 @@ public class User {
     @Column(nullable = false, length = 255)
     private String fullName;
 
+
     @Column(unique = true,nullable = false, length = 255)
     private String email;
+
     private String address;
+
     private String phone;
+
     private String urlAvatar;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
@@ -50,9 +60,23 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    private String verifyCode;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
+
+    @CreatedBy
+    private String createdBy;
+
+    @LastModifiedBy
+    private String updatedBy;
+
     @PrePersist
     public void prePersist() {
-        isActive = true;
+
         if (role == null) {
             role = Role.USER;
         }

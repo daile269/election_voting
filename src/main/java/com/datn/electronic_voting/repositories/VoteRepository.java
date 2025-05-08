@@ -1,5 +1,6 @@
 package com.datn.electronic_voting.repositories;
 
+import com.datn.electronic_voting.entity.Candidate;
 import com.datn.electronic_voting.entity.Vote;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,5 +16,9 @@ public interface VoteRepository extends JpaRepository<Vote,Long> {
     @Query(value = "SELECT COUNT(*) FROM electronic_voting.vote WHERE election_id = :electionId AND candidate_id = :candidateId"
             , nativeQuery = true)
     int countVoteCandidateInElection(@Param("electionId") Long electionId, @Param("candidateId") Long candidateId);
+
+    boolean existsByUserIdAndCandidateIdAndElectionId(Long userId,Long candidateId, Long electionId);
+
+    List<Vote> getVotesByElectionId(Long electionId);
 
 }

@@ -1,45 +1,59 @@
 package com.datn.electronic_voting.controller.admin;
 
+import com.datn.electronic_voting.dto.CandidateDTO;
+import com.datn.electronic_voting.dto.response.ApiResponse;
+import com.datn.electronic_voting.dto.response.PaginatedResponse;
 import com.datn.electronic_voting.entity.Candidate;
+import com.datn.electronic_voting.entity.User;
 import com.datn.electronic_voting.service.CandidateService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/admin/candidates")
+@RequestMapping("api/candidates")
 public class CandidateController {
 
     private final CandidateService candidateService;
 
     @GetMapping
-    public List<Candidate> getAllCandidate(){
+    public List<CandidateDTO> getAllCandidate(){
         return candidateService.getAllCandidate();
     }
 
     @GetMapping("/paginated")
-    public List<Candidate> getListCandidate(@RequestParam int page, @RequestParam int size){
+    public PaginatedResponse<CandidateDTO> getListCandidate(@RequestParam int page, @RequestParam int size){
         Pageable pageable = PageRequest.of(page-1,size);
-        return candidateService.getCandidatePageable(pageable);
-    }
 
+        return PaginatedResponse.<CandidateDTO>builder()
+                .listElements(candidateService.getCandidatePageable(pageable))
+                .totalPages((int) Math.ceil( (double) (candidateService.totalItem())/size))
+                .build();
+    }
+    @GetMapping("/election/{electionId}")
+    public List<CandidateDTO> getCandidateByElection(@PathVariable Long electionId){
+        return candidateService.getCandidateByElectionId(electionId);
+    }
     @GetMapping(value = "/{id}")
-    public Candidate getCandidateById(@PathVariable Long id){
+    public CandidateDTO getCandidateById(@PathVariable Long id){
         return candidateService.findCandidateById(id);
     }
 
     @PostMapping
-    public Candidate createCandidate(@RequestBody Candidate candidate){
+    public CandidateDTO createCandidate(@Valid @RequestBody CandidateDTO candidate){
         return candidateService.createCandidate(candidate);
     }
 
     @PutMapping(value = "/{id}")
-    public Candidate updateCandidate(@RequestBody Candidate candidate, @PathVariable Long id){
+    public CandidateDTO updateCandidate(@Valid @RequestBody CandidateDTO candidate, @PathVariable Long id){
         return candidateService.updateCandidate(candidate,id);
     }
 
@@ -49,5 +63,13 @@ public class CandidateController {
         return ResponseEntity.ok().body("Xóa thành công");
     }
 
+    @PatchMapping("/upload-image/{candidateId}")
+    public ApiResponse<CandidateDTO> uploadImage(@PathVariable Long candidateId, @RequestParam("image") MultipartFile image) throws IOException {
+        return ApiResponse.<CandidateDTO>builder()
+                .code(200)
+                .message("Cập nhật ảnh thành công")
+                .result(candidateService.updateImage(candidateId,image))
+                .build();
+    }
 
 }

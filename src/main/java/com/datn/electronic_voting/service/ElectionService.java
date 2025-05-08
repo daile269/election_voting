@@ -1,5 +1,6 @@
 package com.datn.electronic_voting.service;
 
+import com.datn.electronic_voting.dto.ElectionDTO;
 import com.datn.electronic_voting.entity.Election;
 import org.springframework.data.domain.Pageable;
 
@@ -7,18 +8,19 @@ import java.util.List;
 
 public interface ElectionService {
 
-    Election createElection(Election election);
+    ElectionDTO createElection(ElectionDTO electionDTO);
 
-    Election updateElection(Election election, Long id);
+    ElectionDTO updateElection(ElectionDTO electionDTO, Long id);
 
-    List<Election> getAllElections();
+    List<ElectionDTO> getAllElections();
 
-    List<Election> getElectionPageable(Pageable pageable);
+    List<ElectionDTO> getElectionPageable(Pageable pageable);
 
-    Election findElectionById(Long id);
+    ElectionDTO findElectionById(Long id);
 
-    Election findElectionByElectionCode(String electionCode);
+    ElectionDTO findElectionByElectionCode(String electionCode);
 
     void deleteElection(Long id);
+    int totalItem();
 
 }

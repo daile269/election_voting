@@ -1,20 +1,22 @@
 package com.datn.electronic_voting.service;
 
+import com.datn.electronic_voting.dto.ResultDTO;
 import com.datn.electronic_voting.entity.Result;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface ResultService {
-    Result createResult(Result result);
+    ResultDTO createResult(ResultDTO resultDTO);
 
-    Result updateResult(Result result, Long id);
+    ResultDTO updateResult(ResultDTO resultDTO, Long id);
 
-    List<Result> getAllResults();
+    List<ResultDTO> getAllResults();
 
-    List<Result> getResultsPageable(Pageable pageable);
+    List<ResultDTO> getResultsPageable(Pageable pageable);
 
-    Result findResultById(Long id);
+    ResultDTO findResultById(Long id);
 
+    List<ResultDTO> getResultsByElectionId(Long electionId);
     void deleteResult(Long id);
 }

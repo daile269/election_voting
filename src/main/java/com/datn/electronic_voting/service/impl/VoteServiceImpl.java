@@ -1,8 +1,10 @@
 package com.datn.electronic_voting.service.impl;
 
+import com.datn.electronic_voting.dto.VoteDTO;
 import com.datn.electronic_voting.entity.Vote;
 import com.datn.electronic_voting.exception.AppException;
 import com.datn.electronic_voting.exception.ErrorCode;
+import com.datn.electronic_voting.mapper.VoteMapper;
 import com.datn.electronic_voting.repositories.CandidateRepository;
 import com.datn.electronic_voting.repositories.ElectionRepository;
 import com.datn.electronic_voting.repositories.UserRepository;
@@ -13,8 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.HashMap;
 import java.util.List;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class IVoteService implements VoteService {
+public class VoteServiceImpl implements VoteService {
 
     private final VoteRepository voteRepository;
 
@@ -32,6 +32,8 @@ public class IVoteService implements VoteService {
     private final UserRepository userRepository;
 
     private final CandidateRepository candidateRepository;
+
+    private final VoteMapper voteMapper;
 
     private final String GENERATOR ="03FB32C9B73134D0B2E77506660EDBD484CA7B18F21EF205407F4793A1A0BA12510DBC15077BE463FFF4FED4AAC0BB555BE3A6C1B0C6B47B1BC3773BF7E8C6F62901228F8C28CBB18A55AE31341000A650196F931C77A57F2DDF463E5E9EC144B777DE62AAAB8A8628AC376D282D6ED3864E67982428EBC831D14348F6F2F9193B5045AF2767164E1DFC967C1FB3F2E55A4BD1BFFE83B9C80D052B985D182EA0ADB2A3B7313D3FE14C8484B1E052588B9B7D2BBD2DF016199ECD06E1557CD0915B3353BBB64E0EC377FD028370DF92B52C7891428CDC67EB6184B523D1DB246C32F63078490F00EF8D647D148D47954515E2327CFEF98C582664B4C0F6CC41659";
 
@@ -44,10 +46,15 @@ public class IVoteService implements VoteService {
     private final BigInteger q = new BigInteger("08CF83642A709A097B447997640129DA299B1A47D1EB3750BA308B0FE64F5FBD3", 16);
 
     @Override
-    public Vote createVote(Vote vote,boolean voteChoice) {
+    public VoteDTO createVote(VoteDTO voteDTO, boolean voteChoice) {
+        Vote vote = voteMapper.toEntity(voteDTO);
         checkInforVote(vote);
+        if(voteRepository.existsByUserIdAndCandidateIdAndElectionId(vote.getUserId(),vote.getCandidateId(), vote.getElectionId())) {
+            throw new AppException(ErrorCode.VOTE_IS_EXITS);
+        }
         Vote vote1 = encryptedVote(vote,voteChoice);
-        return voteRepository.save(vote1);
+        voteRepository.save(vote1);
+        return voteMapper.toDTO(voteRepository.save(vote1));
     }
 
     @Override
@@ -70,7 +77,8 @@ public class IVoteService implements VoteService {
     }
 
     @Override
-    public Vote updateVote(Vote vote,Long id,boolean voteChoice) {
+    public VoteDTO updateVote(VoteDTO voteDTO,Long id,boolean voteChoice) {
+        Vote vote = voteMapper.toEntity(voteDTO);
         Vote rs = voteRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOTE_NOT_FOUND));
         checkInforVote(vote);
         Vote vote1 = encryptedVote(vote,voteChoice);
@@ -78,22 +86,26 @@ public class IVoteService implements VoteService {
         rs.setGx(vote1.getGx());
         rs.setGy(vote1.getGy());
         rs.setEncryptedVote(vote1.getEncryptedVote());
-        return voteRepository.save(rs);
+        voteRepository.save(rs);
+        return voteMapper.toDTO(voteRepository.save(rs));
     }
 
     @Override
-    public List<Vote> getAllVotes() {
-        return voteRepository.findAll();
+    public List<VoteDTO> getAllVotes() {
+        return voteRepository.findAll()
+                .stream().map(vote -> voteMapper.toDTO(vote)).collect(Collectors.toList());
     }
 
     @Override
-    public List<Vote> getVotesPageable(Pageable pageable) {
-        return voteRepository.findAll(pageable).getContent();
+    public List<VoteDTO> getVotesPageable(Pageable pageable) {
+        return voteRepository.findAll(pageable).getContent()
+                .stream().map(vote -> voteMapper.toDTO(vote)).collect(Collectors.toList());
     }
 
     @Override
-    public Vote findVoteById(Long id) {
-        return voteRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOTE_NOT_FOUND));
+    public VoteDTO findVoteById(Long id) {
+        Vote vote = voteRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.VOTE_NOT_FOUND));
+        return voteMapper.toDTO(vote);
     }
 
     @Override
@@ -103,8 +115,16 @@ public class IVoteService implements VoteService {
     }
 
     @Override
-    public List<Vote> getVoteByElectionAndCandidateId(Long electionId,Long candidateId) {
-        return voteRepository.findAllByElectionIdAndCandidateId(electionId,candidateId);
+    public List<VoteDTO> getVoteByElectionAndCandidateId(Long electionId,Long candidateId) {
+        List<Vote> voteList = voteRepository.findAllByElectionIdAndCandidateId(electionId,candidateId);
+        return voteList.stream()
+                .map(vote -> voteMapper.toDTO(vote)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<VoteDTO> getVotesByElectionId(Long electionId) {
+        List<Vote> voteList = voteRepository.getVotesByElectionId(electionId);
+        return voteList.stream().map(vote -> voteMapper.toDTO(vote)).collect(Collectors.toList());
     }
 
     @Override
@@ -114,10 +134,19 @@ public class IVoteService implements VoteService {
         return voteRepository.countVoteCandidateInElection(electionId,candidateId);
     }
 
+    @Override
+    public int totalItem() {
+        return (int) voteRepository.count();
+    }
+
     private void checkInforVote(Vote vote){
-        electionRepository.findById(vote.getElectionId()).orElseThrow(() -> new AppException(ErrorCode.ELECTION_NOT_FOUND));
-        userRepository.findById(vote.getUserId()).orElseThrow(() -> new AppException(ErrorCode.USER_IS_NOT_EXISTS));
-        candidateRepository.findById(vote.getCandidateId()).orElseThrow(() -> new AppException(ErrorCode.CANDIDATE_NOT_FOUND));
+        electionRepository.findById(vote.getElectionId())
+                .orElseThrow(() -> new AppException(ErrorCode.ELECTION_NOT_FOUND));
+        userRepository.findById(vote.getUserId())
+                .orElseThrow(() -> new AppException(ErrorCode.USER_IS_NOT_EXISTS));
+        candidateRepository
+                .findById(vote.getCandidateId()).orElseThrow(() -> new AppException(ErrorCode.CANDIDATE_NOT_FOUND));
+
     }
 
     public Vote encryptedVote(Vote vote,boolean voteChoice){

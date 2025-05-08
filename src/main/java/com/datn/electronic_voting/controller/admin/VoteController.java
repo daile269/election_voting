@@ -1,6 +1,7 @@
 package com.datn.electronic_voting.controller.admin;
 
-import com.datn.electronic_voting.entity.Vote;
+import com.datn.electronic_voting.dto.VoteDTO;
+import com.datn.electronic_voting.dto.response.PaginatedResponse;
 import com.datn.electronic_voting.service.VoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -12,34 +13,40 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/admin/votes")
+@RequestMapping("api/votes")
 public class VoteController {
 
     private final VoteService voteService;
 
     @GetMapping
-    public List<Vote> getVotes(){
+    public List<VoteDTO> getVotes(){
         return voteService.getAllVotes();
     }
 
     @GetMapping(value = "/paginated")
-    public List<Vote> getVotePageable(@RequestParam int page, @RequestParam int size){
+    public PaginatedResponse<VoteDTO> getVotePageable(@RequestParam int page, @RequestParam int size){
         Pageable pageable = PageRequest.of(page-1,size);
-        return voteService.getVotesPageable(pageable);
+        return PaginatedResponse.<VoteDTO>builder()
+                .listElements(voteService.getVotesPageable(pageable))
+                .totalPages((int) Math.ceil( (double) (voteService.totalItem())/size))
+                .build();
     }
-
+    @GetMapping("/election/{electionId}")
+    public List<VoteDTO> getVotesByElection(@PathVariable Long electionId){
+        return voteService.getVotesByElectionId(electionId);
+    }
     @GetMapping(value = "/{id}")
-    public Vote getVoteById(@PathVariable Long id){
+    public VoteDTO getVoteById(@PathVariable Long id){
         return voteService.findVoteById(id);
     }
 
     @PostMapping
-    public Vote createVote(@RequestBody Vote vote, @RequestParam boolean voteChoice){
+    public VoteDTO createVote(@RequestBody VoteDTO vote, @RequestParam boolean voteChoice){
         return voteService.createVote(vote,voteChoice);
     }
 
     @PutMapping(value = "/{id}")
-    public Vote updateVote(@RequestBody Vote vote, @PathVariable Long id,@RequestParam boolean voteChoice){
+    public VoteDTO updateVote(@RequestBody VoteDTO vote, @PathVariable Long id,@RequestParam boolean voteChoice){
         return voteService.updateVote(vote,id,voteChoice);
     }
 
@@ -55,7 +62,7 @@ public class VoteController {
                 +voteService.countAgreeVotes(electionId,candidateId));
     }
     @GetMapping("/{electionId}/{candidateId}")
-    public List<Vote> getvoteEle(@PathVariable Long electionId,@PathVariable Long candidateId){
+    public List<VoteDTO> getvoteEle(@PathVariable Long electionId,@PathVariable Long candidateId){
         return voteService.getVoteByElectionAndCandidateId(electionId,candidateId);
     }
 
