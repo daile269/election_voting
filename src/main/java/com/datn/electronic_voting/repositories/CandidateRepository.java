@@ -12,8 +12,6 @@ import java.util.List;
 public interface CandidateRepository extends JpaRepository<Candidate,Long> {
     boolean existsByEmail(String email);
 
-    @Query(value = "SELECT * FROM electronic_voting.candidate WHERE election_id = :electionId "
-            , nativeQuery = true)
-    List<Candidate> getCandidateByElectionId(Long electionId);
+
 
 }

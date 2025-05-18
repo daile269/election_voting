@@ -3,6 +3,7 @@ package com.datn.electronic_voting.dto;
 import com.datn.electronic_voting.enums.ElectronStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 public class ElectionDTO {
 
     private Long id;
+
     private String electionCode;
 
     @NotBlank(message = "Title is required")

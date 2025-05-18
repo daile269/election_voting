@@ -38,7 +38,7 @@ public class JwtService {
                 .add(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(Date.from(Instant.now().plus(30, ChronoUnit.MINUTES)))
+                .expiration(Date.from(Instant.now().plus(50, ChronoUnit.MINUTES)))
                 .add("role",user.getRole())
                 .and()
                 .signWith(getKey())

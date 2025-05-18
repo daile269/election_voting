@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -81,7 +82,16 @@ public class User {
             role = Role.USER;
         }
     }
+    @ManyToMany
+    @JoinTable(
+            name = "user_election",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "election_id")
+    )
+    @ToString.Exclude
+    private List<Election> elections;
 
     @OneToMany(mappedBy = "userVote")
+    @ToString.Exclude
     private List<Vote> voteList ;
 }

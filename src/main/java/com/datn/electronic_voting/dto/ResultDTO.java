@@ -1,31 +1,25 @@
 package com.datn.electronic_voting.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class ResultDTO {
-    private Long id;
-
-    private Long candidateId;
-
-
     private Long electionId;
+    private List<TallyDTO> tallies;
 
-    private int voteCount;
+    private int totalVotes;
 
-    private boolean isWinner;
-
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-
-    private String createdBy;
-
-    private String updatedBy;
+    public ResultDTO(Long electionId, List<TallyDTO> tallies) {
+        this.electionId = electionId;
+        this.tallies = tallies;
+        this.totalVotes = tallies.stream().mapToInt(TallyDTO::getVotes).sum();
+    }
 }

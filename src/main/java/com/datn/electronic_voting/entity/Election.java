@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -62,13 +63,16 @@ public class Election {
     }
 
     @OneToMany(mappedBy = "electionVote")
+    @ToString.Exclude
     private List<Vote> voteList;
 
-    @OneToMany(mappedBy = "election")
-    private List<Candidate> candidateList;
+    @OneToMany(mappedBy = "election", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<ElectionCandidate> candidateList;
 
-    @OneToMany(mappedBy = "electionResult")
-    private List<Result> resultList;
+    @ManyToMany(mappedBy = "elections")
+    @ToString.Exclude
+    private List<User> users;
 
     @CreatedDate
     private LocalDateTime createdAt;

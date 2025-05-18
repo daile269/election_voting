@@ -2,6 +2,8 @@ package com.datn.electronic_voting.repositories;
 
 import com.datn.electronic_voting.entity.Candidate;
 import com.datn.electronic_voting.entity.Vote;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,8 +19,11 @@ public interface VoteRepository extends JpaRepository<Vote,Long> {
             , nativeQuery = true)
     int countVoteCandidateInElection(@Param("electionId") Long electionId, @Param("candidateId") Long candidateId);
 
-    boolean existsByUserIdAndCandidateIdAndElectionId(Long userId,Long candidateId, Long electionId);
+    boolean existsByUserIdAndElectionIdAndCandidateId(Long userId, Long electionId,Long candidateId);
 
     List<Vote> getVotesByElectionId(Long electionId);
 
+    List<Vote> getVoteByUserId(Long userId, Pageable pageable);
+
+    List<Vote> getAllVoteByUserId(Long userId);
 }

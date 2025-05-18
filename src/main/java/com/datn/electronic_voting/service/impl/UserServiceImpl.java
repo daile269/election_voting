@@ -1,9 +1,10 @@
 package com.datn.electronic_voting.service.impl;
 
 import com.datn.electronic_voting.dto.UserDTO;
-import com.datn.electronic_voting.dto.request.AuthenticationRequest;
-import com.datn.electronic_voting.dto.response.AuthenticationResponse;
+import com.datn.electronic_voting.dto.request.*;
+import com.datn.electronic_voting.dto.response.LoginResponse;
 import com.datn.electronic_voting.entity.User;
+import com.datn.electronic_voting.enums.Role;
 import com.datn.electronic_voting.exception.AppException;
 import com.datn.electronic_voting.exception.ErrorCode;
 import com.datn.electronic_voting.mapper.UserMapper;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -52,9 +54,16 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.toEntity(userDTO);
         User user1 = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_IS_NOT_EXISTS));
         user.setId(id);
-        user.setPassword(encoder.encode(user.getPassword()));
+        if(!user.getPassword().equals(user1.getPassword())){
+            user.setPassword(encoder.encode(user.getPassword()));
+        }else user.setPassword(user.getPassword());
         user.setUrlAvatar(user1.getUrlAvatar());
         user.setEmail(user1.getEmail());
+        if(user.getRole()==null){
+            user.setRole(user1.getRole());
+        }
+        user.setCreatedAt(user1.getCreatedAt());
+        user.setCreatedBy(user1.getCreatedBy());
         return userMapper.toDTO(userRepository.save(user));
     }
 
@@ -77,13 +86,36 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDTO findUserByUsername(String username) {
+        User user = userRepository.findByUsername(username);
+        return userMapper.toDTO(user);
+    }
+
+    @Override
+    public List<UserDTO> findUserInElection(Long electionId) {
+        List<User> users = userRepository.findUserInElection(electionId);
+        return users.stream()
+                .map(user -> userMapper.toDTO(user)).collect(Collectors.toList());
+    }
+
+    @Override
+    public List<UserDTO> findUserNotInElection(Long electionId) {
+        List<User> users = userRepository.findUserNotInElection(electionId);
+        List<User> filteredUsers = users.stream()
+                .filter(user -> !user.getRole().equals(Role.ADMIN)&& user.isActive())
+                .collect(Collectors.toList());
+        return filteredUsers.stream()
+                .map(user -> userMapper.toDTO(user)).collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteUser(Long id) {
         userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_IS_NOT_EXISTS));
         userRepository.deleteById(id);
     }
 
     @Override
-    public AuthenticationResponse verify(AuthenticationRequest auth) {
+    public LoginResponse verify(AuthenticationRequest auth) {
         User user = userRepository.findByUsername(auth.getUsername());
         if(user == null || !encoder.matches(auth.getPassword(), user.getPassword())){
             throw new AppException(ErrorCode.LOGIN_VALID);
@@ -92,7 +124,7 @@ public class UserServiceImpl implements UserService {
                 authManager.authenticate(new UsernamePasswordAuthenticationToken(auth.getUsername(),auth.getPassword()));
         if(!authentication.isAuthenticated()) throw new AppException(ErrorCode.UNAUTHENTICATED);
         String tokenResponse = jwtService.generateToken(auth.getUsername());
-        return AuthenticationResponse.builder()
+        return LoginResponse.builder()
                 .token(tokenResponse)
                 .authenticated(true).build();
     }
@@ -119,15 +151,47 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void activeUser(Long userId, String verifyCode) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_IS_NOT_EXISTS));
+    public void verifyUser(VerifyCodeRequest request) {
+        User user = userRepository.findByUsername(request.getUsername());
+        if(user==null) throw new AppException(ErrorCode.USER_IS_NOT_EXISTS);
         if(user.isActive()) throw new AppException(ErrorCode.USER_IS_ACTIVE);
-        if(user.getVerifyCode().equals(verifyCode)){
+        if(user.getVerifyCode().equals(request.getVerifyCode())){
             user.setActive(true);
             userRepository.save(user);
         }else throw new AppException(ErrorCode.VERIFY_CODE_VALID);
     }
+
+    @Override
+    public void resetPassword(ResetPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail());
+        if(user==null) throw new AppException(ErrorCode.USER_IS_NOT_EXISTS);
+        String newPassword = generatePassword();
+        user.setPassword(encoder.encode(newPassword));
+        emailServiceImpl.sendNewPasswordToEmail(request.getEmail(), newPassword,user.getUsername());
+        userRepository.save(user);
+    }
+
+    @Override
+    public void sendVerifyCode(SendVerifyCodeRequest request) {
+        User user = userRepository.findByUsername(request.getUsername());
+        if(user==null) throw new AppException(ErrorCode.USER_IS_NOT_EXISTS);
+        String verifyCode = String.valueOf(100000 + new Random().nextInt(900000));
+        user.setVerifyCode(verifyCode);
+        emailServiceImpl.sendVerificationEmail(user.getEmail(),verifyCode);
+        userRepository.save(user);
+    }
+
+    @Override
+    public void changePassword(ChangePasswordRequest request) {
+        User user = userRepository.findByUsername(request.getUsername());
+        if(user==null) throw new AppException(ErrorCode.USER_IS_NOT_EXISTS);
+        if(encoder.matches(request.getOldPassword(),user.getPassword())){
+            user.setPassword(encoder.encode(request.getNewPassword()));
+            userRepository.save(user);
+        }else throw new AppException(ErrorCode.PASS_NOT_MATCH);
+    }
+
+
 
     @Override
     public int totalItem() {
@@ -141,5 +205,18 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.EMAIL_IS_EXISTS);
     }
 
+    public String generatePassword(){
+         String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_+=";
+         int PASSWORD_LENGTH = 12;
+
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder(PASSWORD_LENGTH);
+        for (int i = 0; i < PASSWORD_LENGTH; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            password.append(CHARACTERS.charAt(index));
+        }
+
+        return password.toString();
+    }
 
 }

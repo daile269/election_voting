@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VerifyCodeRequest {
+public class SendVerifyCodeRequest {
     private String username;
-    private String verifyCode;
 }

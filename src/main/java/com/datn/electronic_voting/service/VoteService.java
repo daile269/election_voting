@@ -15,6 +15,8 @@ public interface VoteService {
     List<VoteDTO> getAllVotes();
     List<VoteDTO> getVotesPageable(Pageable pageable);
 
+    List<VoteDTO> getVoteByUserId(Long userId,Pageable pageable);
+
     VoteDTO findVoteById(Long id);
 
     void deleteVote(Long id);
@@ -26,4 +28,6 @@ public interface VoteService {
 
     int countVoteCandidateInElection(Long electionId,Long candidateId);
     int totalItem();
+
+    int totalItemVotesForUser(Long userId);
 }

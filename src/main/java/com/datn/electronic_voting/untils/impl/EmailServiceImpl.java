@@ -20,4 +20,16 @@ public class EmailServiceImpl implements EmailService {
         message.setFrom("daile2692003@gmail.com");
         mailSender.send(message);
     }
+
+    @Override
+    public void sendNewPasswordToEmail(String toEmail, String newPassword,String username) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Thiết lập lại mật khẩu");
+        message.setText("Chào mừng người dùng: "+username +" quay trở lại với hệ thống bỏ phiếu\nMật khẩu mới của bạn là: " + newPassword+
+                "\nHãy đăng nhập với mật khẩu mới!");
+        message.setFrom("daile2692003@gmail.com");
+        mailSender.send(message);
+    }
+
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -22,7 +23,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class,property = "id")
 @Table(name = "vote",
-        uniqueConstraints = { @UniqueConstraint(columnNames = { "userId", "electionId" }) })
+        uniqueConstraints = { @UniqueConstraint(columnNames = { "userId", "electionId", "candidateId" }) })
 public class Vote {
 
     @Id
@@ -32,21 +33,28 @@ public class Vote {
 
     @ManyToOne
     @JoinColumn(name = "userId",nullable = false,insertable = false,updatable = false)
+    @ToString.Exclude
     private User userVote;
     private Long userId;
 
     @ManyToOne
     @JoinColumn(name = "electionId",nullable = false,insertable = false,updatable = false)
+    @ToString.Exclude
     private Election electionVote;
     private Long electionId;
 
     @ManyToOne
     @JoinColumn(name = "candidateId",nullable = false,insertable = false,updatable = false)
+    @ToString.Exclude
     private Candidate candidateVote;
     private Long candidateId;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime voteTime;
+
+    // khóa xi
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String x;
 
     // gx = g^x mod p (public key của người vote)
     @Column(nullable = false, columnDefinition = "TEXT")

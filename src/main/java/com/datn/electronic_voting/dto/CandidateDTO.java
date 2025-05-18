@@ -2,10 +2,7 @@ package com.datn.electronic_voting.dto;
 
 import com.datn.electronic_voting.entity.Election;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,8 +16,6 @@ import java.util.Date;
 @AllArgsConstructor
 public class CandidateDTO {
     private Long id;
-
-    private Long electionId;
 
     @NotBlank(message = "Full name is required")
     @Size(max = 255, message = "Full name must not exceed 255 characters")

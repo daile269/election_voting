@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VerifyCodeRequest {
-    private String username;
-    private String verifyCode;
+public class ResetPasswordRequest {
+    private String email;
 }

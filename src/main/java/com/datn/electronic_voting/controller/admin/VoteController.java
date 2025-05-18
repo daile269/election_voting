@@ -1,12 +1,16 @@
 package com.datn.electronic_voting.controller.admin;
 
 import com.datn.electronic_voting.dto.VoteDTO;
+import com.datn.electronic_voting.dto.response.ApiResponse;
 import com.datn.electronic_voting.dto.response.PaginatedResponse;
 import com.datn.electronic_voting.service.VoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +28,7 @@ public class VoteController {
     }
 
     @GetMapping(value = "/paginated")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public PaginatedResponse<VoteDTO> getVotePageable(@RequestParam int page, @RequestParam int size){
         Pageable pageable = PageRequest.of(page-1,size);
         return PaginatedResponse.<VoteDTO>builder()
@@ -35,14 +40,29 @@ public class VoteController {
     public List<VoteDTO> getVotesByElection(@PathVariable Long electionId){
         return voteService.getVotesByElectionId(electionId);
     }
+
+    @GetMapping("/user/{userId}/paginated")
+    public PaginatedResponse<VoteDTO> getVotesForUser(@PathVariable Long userId,@RequestParam int page, @RequestParam int size){
+        Pageable pageable = PageRequest.of(page-1,size);
+        return PaginatedResponse.<VoteDTO>builder()
+                .listElements(voteService.getVoteByUserId(userId,pageable))
+                .totalPages((int) Math.ceil( (double) (voteService.totalItemVotesForUser(userId))/size))
+                .build();
+    }
     @GetMapping(value = "/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public VoteDTO getVoteById(@PathVariable Long id){
         return voteService.findVoteById(id);
     }
 
     @PostMapping
-    public VoteDTO createVote(@RequestBody VoteDTO vote, @RequestParam boolean voteChoice){
-        return voteService.createVote(vote,voteChoice);
+    public ApiResponse<VoteDTO> createVote(@RequestBody VoteDTO vote, @RequestParam boolean voteChoice){
+        return ApiResponse.<VoteDTO>builder()
+                .code(200)
+                .message("Bạn đã bỏ phiếu thành công cho ứng viên này")
+                .result(voteService.createVote(vote,voteChoice))
+                .build();
+
     }
 
     @PutMapping(value = "/{id}")
@@ -62,11 +82,13 @@ public class VoteController {
                 +voteService.countAgreeVotes(electionId,candidateId));
     }
     @GetMapping("/{electionId}/{candidateId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public List<VoteDTO> getvoteEle(@PathVariable Long electionId,@PathVariable Long candidateId){
         return voteService.getVoteByElectionAndCandidateId(electionId,candidateId);
     }
 
     @GetMapping("/totalVote/{electionId}/{candidateId}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<String> totalVoteInElection(@PathVariable Long electionId,@PathVariable Long candidateId){
         return ResponseEntity.ok("Tổng số lượng vote cho ứng viên này là: "
                 +voteService.countVoteCandidateInElection(electionId,candidateId));

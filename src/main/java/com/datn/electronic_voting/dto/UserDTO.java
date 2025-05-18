@@ -25,7 +25,7 @@ public class UserDTO {
     private String username;
 
     @NotBlank(message = "Password is required")
-    @Size(min = 6, max = 255, message = "Password must be between 6 and 255 characters")
+    @Size(min = 5, max = 255, message = "Password must be between 6 and 255 characters")
     private String password;
 
     @NotBlank(message = "Full name is required")
@@ -40,8 +40,7 @@ public class UserDTO {
 
     private String address;
 
-    @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^(\\+84|0)[0-9]{9,10}$", message = "Invalid phone number format")
+        @Pattern(regexp = "^(\\+84|0)[0-9]{9,10}$", message = "Invalid phone number format")
     private String phone;
 
     private String urlAvatar;

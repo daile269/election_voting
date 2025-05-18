@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
@@ -31,10 +32,9 @@ public class Candidate {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "electionId",nullable = false,insertable = false,updatable = false)
-    private Election election;
-    private Long electionId;
+    @OneToMany(mappedBy = "candidate", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    private List<ElectionCandidate> elections;
 
     @Column(nullable = false, length = 255)
     private String fullName;
@@ -55,10 +55,9 @@ public class Candidate {
     private String urlAvatar;
 
     @OneToMany(mappedBy = "candidateVote")
+    @ToString.Exclude
     private List<Vote> voteList;
 
-    @OneToMany(mappedBy = "candidateResult")
-    private List<Result> result;
 
     @CreatedDate
     private LocalDateTime createdAt;
