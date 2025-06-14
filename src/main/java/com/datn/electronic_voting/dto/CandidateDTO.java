@@ -36,6 +36,7 @@ public class CandidateDTO {
     private Date dateOfBirth;
 
     private String address;
+    private String gender;
     private String urlAvatar;
 
     private LocalDateTime createdAt;

@@ -50,6 +50,11 @@ public class CandidateController {
         return candidateService.getCandidatesNotInElection(electionId);
     }
 
+    @GetMapping("/user-vote/{userId}")
+    public List<CandidateDTO> getCandidatesByUser(@PathVariable Long userId){
+        return candidateService.getCandidatesByUserVote(userId);
+    }
+
     @GetMapping(value = "/{id}")
     public CandidateDTO getCandidateById(@PathVariable Long id){
         return candidateService.findCandidateById(id);

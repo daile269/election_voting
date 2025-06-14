@@ -44,7 +44,7 @@ public class UserDTO {
     private String phone;
 
     private String urlAvatar;
-
+    private String gender;
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date dateOfBirth;
 

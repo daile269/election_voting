@@ -61,11 +61,11 @@ public class Vote {
     private String gx;
 
     // encryptedVote = (g^y)^x * g mod p (phiếu mã hóa)
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String encryptedVote;
 
     // encryptedVote = (g^y)^x * g mod p (phiếu mã hóa)
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column( columnDefinition = "TEXT")
     private String gy;
 
     @CreatedDate

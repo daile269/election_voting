@@ -26,4 +26,9 @@ public interface UserRepository extends JpaRepository<User,Long> {
             "(SELECT ue.user_id FROM user_election ue " +
             "WHERE ue.election_id = :electionId)", nativeQuery = true)
     List<User> findUserInElection(@Param("electionId") Long electionId);
+
+    @Query(value = "SELECT COUNT(*) FROM user c WHERE c.id IN " +
+            "(SELECT ue.user_id FROM user_election ue " +
+            "WHERE ue.election_id = :electionId)", nativeQuery = true)
+    int countUserInElection(@Param("electionId") Long electionId);
 }

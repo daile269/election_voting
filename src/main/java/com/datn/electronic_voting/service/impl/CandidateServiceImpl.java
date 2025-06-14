@@ -144,6 +144,12 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
+    public List<CandidateDTO> getCandidatesByUserVote(Long userId) {
+        List<Candidate> candidates = candidateRepository.findCandidatesVotedByUser(userId);
+        return candidates.stream().map(candidate -> candidateMapper.toDTO(candidate)).collect(Collectors.toList());
+    }
+
+    @Override
     public int totalItem() {
         return (int) candidateRepository.count();
     }

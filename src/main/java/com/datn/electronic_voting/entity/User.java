@@ -1,5 +1,6 @@
 package com.datn.electronic_voting.entity;
 
+import com.datn.electronic_voting.enums.Gender;
 import com.datn.electronic_voting.enums.Role;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -60,7 +61,8 @@ public class User {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
-
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
     private String verifyCode;
 
     @CreatedDate
@@ -86,7 +88,8 @@ public class User {
     @JoinTable(
             name = "user_election",
             joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "election_id")
+            inverseJoinColumns = @JoinColumn(name = "election_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "election_id"})
     )
     @ToString.Exclude
     private List<Election> elections;

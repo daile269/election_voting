@@ -14,12 +14,14 @@ import com.datn.electronic_voting.repositories.ElectionRepository;
 import com.datn.electronic_voting.repositories.UserRepository;
 import com.datn.electronic_voting.service.ElectionService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,6 +39,7 @@ public class ElectionServiceImpl implements ElectionService {
     private final ElectionCandidateMapper electionCandidateMapper;
 
     private final UserRepository userRepository;
+    private final VoteChoiceCache voteChoiceCache;
 
     @Override
     public ElectionDTO createElection(ElectionDTO electionDTO) {
@@ -114,7 +117,8 @@ public class ElectionServiceImpl implements ElectionService {
 
     @Override
     public List<ElectionDTO> getElectionByUserId(Long userId, Pageable pageable) {
-        List<Election> elections = electionRepository.findElectionsByUserId(userId,pageable);
+        Page<Election> electionsPage = electionRepository.findElectionsByUserId(userId, pageable);
+        List<Election> elections = electionsPage.getContent();
         return elections.stream().map(election -> electionMapper.toDTO(election)).collect(Collectors.toList());
     }
 
@@ -170,16 +174,23 @@ public class ElectionServiceImpl implements ElectionService {
         List<Election> elections = electionRepository.findAll();
         for(Election election:elections){
             if(election.getEndTime().isBefore(LocalDateTime.now())&& election.getStatus()==ElectronStatus.ONGOING){
-                election.setStatus(ElectronStatus.FINISHED);
+                List<User> users = userRepository.findUserInElection(election.getId());
+                Set<Long> allUserIds = users.stream()
+                        .map(User::getId)
+                        .collect(Collectors.toSet());
+                if (voteChoiceCache.anyCandidateNotFullyVoted(election.getId(), allUserIds)) {
+                    election.setStatus(ElectronStatus.CANCELLED);
+                }else {
+                    election.setStatus(ElectronStatus.FINISHED);
+                }
+
                 electionRepository.save(election);
+                voteChoiceCache.clearElection(election.getId());
             }
             if(election.getStartTime().isBefore(LocalDateTime.now()) && election.getStatus()==ElectronStatus.UPCOMING){
                 election.setStatus(ElectronStatus.ONGOING);
                 electionRepository.save(election);
             }
-//            if(election.getStartTime().isAfter(LocalDateTime.now())&& election.getStatus()==ElectronStatus.FINISHED){
-//                election.setStatus(ElectronStatus.UPCOMING);
-//            }
         }
     }
 
@@ -196,8 +207,7 @@ public class ElectionServiceImpl implements ElectionService {
 
     @Override
     public int totalItemElectionsForUser(Long userId) {
-        List<Election> elections = electionRepository.findAllElectionsByUserId(userId);
-        return elections.size();
+        return electionRepository.countUserElectionsByUserId(userId);
     }
 
     public void checkTime(LocalDateTime startTime, LocalDateTime endTime){

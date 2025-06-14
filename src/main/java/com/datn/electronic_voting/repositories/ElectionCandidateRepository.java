@@ -12,4 +12,6 @@ public interface ElectionCandidateRepository extends JpaRepository<ElectionCandi
     List<ElectionCandidate> findByElectionId(Long electionId);
 
     ElectionCandidate findByElectionIdAndCandidateId(Long electionId,Long candidateId);
+
+    int countByElectionId(Long electionId);
 }

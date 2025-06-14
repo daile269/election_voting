@@ -27,5 +27,7 @@ public interface CandidateService {
     List<CandidateDTO> getCandidateByElectionId(Long electionId);
 
     List<CandidateDTO> getCandidatesNotInElection(Long electionId);
+
+    List<CandidateDTO> getCandidatesByUserVote(Long userId);
     int totalItem();
 }

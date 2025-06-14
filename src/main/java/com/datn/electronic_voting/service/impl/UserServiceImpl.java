@@ -62,6 +62,7 @@ public class UserServiceImpl implements UserService {
         if(user.getRole()==null){
             user.setRole(user1.getRole());
         }
+        user.setActive(user1.isActive());
         user.setCreatedAt(user1.getCreatedAt());
         user.setCreatedBy(user1.getCreatedBy());
         return userMapper.toDTO(userRepository.save(user));

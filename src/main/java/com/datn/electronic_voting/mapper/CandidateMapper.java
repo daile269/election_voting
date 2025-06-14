@@ -12,7 +12,9 @@ public interface CandidateMapper {
     @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "createdBy", source = "createdBy")
     @Mapping(target = "updatedBy", source = "updatedBy")
+    @Mapping(target = "gender", source = "gender")
     CandidateDTO toDTO(Candidate candidate);
 
+    @Mapping(target = "gender", source = "gender")
     Candidate toEntity(CandidateDTO candidateDTO);
 }

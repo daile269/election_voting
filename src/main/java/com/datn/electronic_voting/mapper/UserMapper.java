@@ -12,7 +12,9 @@ public interface UserMapper {
     @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "createdBy", source = "createdBy")
     @Mapping(target = "updatedBy", source = "updatedBy")
+    @Mapping(target = "gender", source = "gender")
     UserDTO toDTO(User user);
 
+    @Mapping(target = "gender", source = "gender")
     User toEntity(UserDTO userDTO);
 }

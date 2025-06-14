@@ -1,5 +1,6 @@
 package com.datn.electronic_voting.entity;
 
+import com.datn.electronic_voting.enums.Gender;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -53,6 +54,8 @@ public class Candidate {
 
     private String address;
     private String urlAvatar;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @OneToMany(mappedBy = "candidateVote")
     @ToString.Exclude
