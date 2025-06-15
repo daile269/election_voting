@@ -3,6 +3,7 @@ package com.datn.electronic_voting.service;
 import com.datn.electronic_voting.dto.UserDTO;
 import com.datn.electronic_voting.dto.request.*;
 import com.datn.electronic_voting.dto.response.LoginResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,6 +26,7 @@ public interface UserService {
     List<UserDTO> findUserInElection(Long electionId);
 
     List<UserDTO> findUserNotInElection(Long electionId);
+    Page<UserDTO> searchUsersPaginated(int page, int size, String fullName, String username, String email, String role);
 
     void deleteUser(Long id);
 

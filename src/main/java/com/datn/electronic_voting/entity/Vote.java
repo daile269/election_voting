@@ -32,7 +32,7 @@ public class Vote {
 
 
     @ManyToOne
-    @JoinColumn(name = "userId",nullable = false,insertable = false,updatable = false)
+    @JoinColumn(name = "userId",nullable = true,insertable = false,updatable = false)
     @ToString.Exclude
     private User userVote;
     private Long userId;

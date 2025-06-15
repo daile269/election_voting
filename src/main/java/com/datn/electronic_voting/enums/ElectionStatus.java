@@ -1,6 +1,6 @@
 package com.datn.electronic_voting.enums;
 
-public enum ElectronStatus {
+public enum ElectionStatus {
     ONGOING,
     FINISHED,
     CANCELLED,

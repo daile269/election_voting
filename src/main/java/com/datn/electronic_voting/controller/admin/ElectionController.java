@@ -9,6 +9,7 @@ import com.datn.electronic_voting.dto.response.PaginatedResponse;
 import com.datn.electronic_voting.service.ElectionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,16 @@ public class ElectionController {
                 .build();
 
     }
+    @GetMapping("/filter")
+    public ResponseEntity<Page<ElectionDTO>> searchElections(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size) {
 
+        Page<ElectionDTO> result = electionService.searchElections(search, status, page, size);
+        return ResponseEntity.ok(result);
+    }
     @GetMapping
     public List<ElectionDTO> getAllElection(){
         return electionService.getAllElections();

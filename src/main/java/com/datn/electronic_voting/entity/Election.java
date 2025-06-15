@@ -1,6 +1,6 @@
 package com.datn.electronic_voting.entity;
 
-import com.datn.electronic_voting.enums.ElectronStatus;
+import com.datn.electronic_voting.enums.ElectionStatus;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -49,7 +49,7 @@ public class Election {
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ElectronStatus status;
+    private ElectionStatus status;
 
 
     @PrePersist
@@ -58,7 +58,7 @@ public class Election {
         String uuidNumbers = UUID.randomUUID().toString().replaceAll("[^a-zA-Z0-9]", "");
         this.electionCode= uuidNumbers.substring(0, 10);
         if (status == null) {
-            status = ElectronStatus.ONGOING;
+            status = com.datn.electronic_voting.enums.ElectionStatus.ONGOING;
         }
     }
 

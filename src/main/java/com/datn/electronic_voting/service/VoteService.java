@@ -1,10 +1,9 @@
 package com.datn.electronic_voting.service;
 
 import com.datn.electronic_voting.dto.VoteDTO;
-import com.datn.electronic_voting.entity.Vote;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.math.BigInteger;
 import java.util.List;
 
 public interface VoteService {
@@ -24,7 +23,8 @@ public interface VoteService {
     int countAgreeVotes(Long electionId,Long candidateId);
 
     List<VoteDTO> getVoteByElectionAndCandidateId(Long electionId, Long candidateId);
-    List<VoteDTO> getVotesByElectionId(Long electionId);
+    List<VoteDTO> getVotesAndFilter(Long electionId);
+    public Page<VoteDTO> getVotesAndFilter(Long electionId, int page, int size);
 
     int countVoteCandidateInElection(Long electionId,Long candidateId);
     int totalItem();

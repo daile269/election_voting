@@ -1,5 +1,6 @@
 package com.datn.electronic_voting.repositories;
 
+import com.datn.electronic_voting.dto.VoteDTO;
 import com.datn.electronic_voting.entity.Candidate;
 import com.datn.electronic_voting.entity.Vote;
 import org.springframework.data.domain.Page;
@@ -26,4 +27,12 @@ public interface VoteRepository extends JpaRepository<Vote,Long> {
     List<Vote> getVoteByUserId(Long userId, Pageable pageable);
 
     List<Vote> getAllVoteByUserId(Long userId);
+
+    @Query("""
+    SELECT v FROM Vote v
+    WHERE (:electionId IS NULL OR v.electionId = :electionId)
+""")
+    Page<Vote> findVotesByElectionIdOptional(@Param("electionId") Long electionId, Pageable pageable);
+
+
 }

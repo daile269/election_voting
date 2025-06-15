@@ -2,6 +2,7 @@ package com.datn.electronic_voting.service;
 
 import com.datn.electronic_voting.dto.ElectionCandidateDTO;
 import com.datn.electronic_voting.dto.ElectionDTO;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -21,6 +22,7 @@ public interface ElectionService {
     List<ElectionDTO> getElectionByCandidateId(Long candidateId);
 
     List<ElectionDTO> getElectionByUserId(Long userId,Pageable pageable);
+    Page<ElectionDTO> searchElections(String searchTerm, String status, int page, int size);
 
     ElectionDTO findElectionById(Long id);
 

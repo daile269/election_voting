@@ -5,7 +5,7 @@ import com.datn.electronic_voting.entity.Election;
 import com.datn.electronic_voting.entity.ElectionCandidate;
 import com.datn.electronic_voting.entity.User;
 import com.datn.electronic_voting.entity.Vote;
-import com.datn.electronic_voting.enums.ElectronStatus;
+import com.datn.electronic_voting.enums.ElectionStatus;
 import com.datn.electronic_voting.exception.AppException;
 import com.datn.electronic_voting.exception.ErrorCode;
 import com.datn.electronic_voting.mapper.VoteMapper;
@@ -13,6 +13,7 @@ import com.datn.electronic_voting.repositories.*;
 import com.datn.electronic_voting.service.VoteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -91,7 +92,7 @@ public class VoteServiceImpl implements VoteService {
         if(totalVotes==totalUser){
             Election election = electionRepository.findById(vote.getElectionId())
                     .orElseThrow(() -> new AppException(ErrorCode.ELECTION_NOT_FOUND));
-            election.setStatus(ElectronStatus.FINISHED);
+            election.setStatus(ElectionStatus.FINISHED);
             electionRepository.save(election);
         }
         return voteMapper.toDTO(vote);
@@ -162,10 +163,19 @@ public class VoteServiceImpl implements VoteService {
     }
 
     @Override
-    public List<VoteDTO> getVotesByElectionId(Long electionId) {
+    public List<VoteDTO> getVotesAndFilter(Long electionId) {
         List<Vote> voteList = voteRepository.getVotesByElectionId(electionId);
         return voteList.stream().map(vote -> voteMapper.toDTO(vote)).collect(Collectors.toList());
     }
+
+    @Override
+    public Page<VoteDTO> getVotesAndFilter(Long electionId, int page, int size) {
+        Pageable pageable = PageRequest.of(page-1, size);
+        Page<Vote> votes = voteRepository.findVotesByElectionIdOptional(electionId, pageable);
+        System.out.println(votes);
+        return votes.map(vote -> voteMapper.toDTO(vote));
+    }
+
     @Override
     public int countVoteCandidateInElection(Long electionId, Long candidateId) {
         electionRepository.findById(electionId).orElseThrow(() -> new AppException(ErrorCode.ELECTION_NOT_FOUND));

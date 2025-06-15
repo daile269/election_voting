@@ -4,16 +4,23 @@ import com.datn.electronic_voting.dto.UserDTO;
 import com.datn.electronic_voting.dto.request.*;
 import com.datn.electronic_voting.dto.response.LoginResponse;
 import com.datn.electronic_voting.entity.User;
+import com.datn.electronic_voting.entity.Vote;
 import com.datn.electronic_voting.enums.Role;
 import com.datn.electronic_voting.exception.AppException;
 import com.datn.electronic_voting.exception.ErrorCode;
+import com.datn.electronic_voting.filter.UserSpecification;
 import com.datn.electronic_voting.mapper.UserMapper;
 import com.datn.electronic_voting.repositories.UserRepository;
+import com.datn.electronic_voting.repositories.VoteRepository;
 import com.datn.electronic_voting.service.UserService;
 import com.datn.electronic_voting.untils.S3Service;
 import com.datn.electronic_voting.untils.impl.EmailServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,6 +34,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import static com.datn.electronic_voting.filter.UserSpecification.*;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -39,6 +48,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
 
+    private final VoteRepository voteRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
     @Override
     public UserDTO createUser(UserDTO userDTO) {
@@ -65,6 +75,7 @@ public class UserServiceImpl implements UserService {
         user.setActive(user1.isActive());
         user.setCreatedAt(user1.getCreatedAt());
         user.setCreatedBy(user1.getCreatedBy());
+        user.setElections(user1.getElections());
         return userMapper.toDTO(userRepository.save(user));
     }
 
@@ -110,8 +121,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Page<UserDTO> searchUsersPaginated(int page, int size, String fullName, String username, String email, String role) {
+        Pageable pageable = PageRequest.of(page-1, size, Sort.by("id").ascending());
+
+        Specification<User> spec = Specification.where(hasFullName(fullName))
+                .and(hasUsername(username))
+                .and(hasEmail(email))
+                .and(hasRole(role));
+
+        Page<User> users = userRepository.findAll(spec, pageable);
+        return users.map(user -> userMapper.toDTO(user));
+    }
+
+    @Override
     public void deleteUser(Long id) {
-        userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_IS_NOT_EXISTS));
+        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_IS_NOT_EXISTS));
+        user.getElections().clear();
+        userRepository.save(user);
+        List<Vote> userVotes = voteRepository.getAllVoteByUserId(id);
+        for (Vote vote : userVotes) {
+            vote.setUserId(null);
+            voteRepository.save(vote);
+        }
         userRepository.deleteById(id);
     }
 

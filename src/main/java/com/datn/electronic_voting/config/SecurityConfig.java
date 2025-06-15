@@ -30,7 +30,8 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
 
     private final JwtFilter jwtFilter;
-    private final String[] PUBLIC_ENDPOINTS = {"/api/register","/api/auth/login","/api/auth/logout","/api/users/reset-password"};
+    private final String[] PUBLIC_ENDPOINTS = {"/api/register","/api/auth/login","/api/auth/logout",
+            "/api/users/reset-password","/api/auth/verifyUser"};
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 

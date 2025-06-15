@@ -5,12 +5,11 @@ import com.datn.electronic_voting.dto.response.ApiResponse;
 import com.datn.electronic_voting.dto.response.PaginatedResponse;
 import com.datn.electronic_voting.service.VoteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,7 +27,6 @@ public class VoteController {
     }
 
     @GetMapping(value = "/paginated")
-    @PreAuthorize("hasAuthority('ADMIN')")
     public PaginatedResponse<VoteDTO> getVotePageable(@RequestParam int page, @RequestParam int size){
         Pageable pageable = PageRequest.of(page-1,size);
         return PaginatedResponse.<VoteDTO>builder()
@@ -36,9 +34,19 @@ public class VoteController {
                 .totalPages((int) Math.ceil( (double) (voteService.totalItem())/size))
                 .build();
     }
+    @GetMapping("/filter")
+    public ResponseEntity<Page<VoteDTO>> getVotesPaginated(
+            @RequestParam(required = false) Long electionId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "8") int size
+    ) {
+        Page<VoteDTO> result = voteService.getVotesAndFilter(electionId, page, size);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/election/{electionId}")
     public List<VoteDTO> getVotesByElection(@PathVariable Long electionId){
-        return voteService.getVotesByElectionId(electionId);
+        return voteService.getVotesAndFilter(electionId);
     }
 
     @GetMapping("/user/{userId}/paginated")

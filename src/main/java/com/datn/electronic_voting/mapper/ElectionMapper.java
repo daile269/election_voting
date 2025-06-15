@@ -12,6 +12,7 @@ public interface ElectionMapper {
     @Mapping(target = "updatedAt", source = "updatedAt")
     @Mapping(target = "createdBy", source = "createdBy")
     @Mapping(target = "updatedBy", source = "updatedBy")
+    @Mapping(target = "status", source = "status")
     ElectionDTO toDTO(Election election);
 
     Election toEntity(ElectionDTO electionDTO);

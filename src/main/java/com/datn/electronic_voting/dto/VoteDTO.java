@@ -39,4 +39,6 @@ public class VoteDTO {
     private String createdBy;
 
     private String updatedBy;
+
+
 }

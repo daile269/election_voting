@@ -8,6 +8,7 @@ import com.datn.electronic_voting.dto.response.PaginatedResponse;
 import com.datn.electronic_voting.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
@@ -40,6 +41,18 @@ public class UserController {
                 .listElements(userService.getUsersPageable(pageable))
                 .totalPages((int) Math.ceil( (double) (userService.totalItem())/size))
                 .build();
+    }
+    @GetMapping("/filter")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public Page<UserDTO> getUsersPaginated(
+            @RequestParam int page,
+            @RequestParam int size,
+            @RequestParam(required = false) String fullName,
+            @RequestParam(required = false) String username,
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String role
+    ) {
+        return userService.searchUsersPaginated(page, size, fullName, username, email, role);
     }
 
     @GetMapping("/election/{electionId}")
